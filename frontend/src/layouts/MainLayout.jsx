@@ -1,15 +1,15 @@
 import { Outlet } from "react-router-dom";
+import Navbar from "../components/layout/Navbar.jsx";
+import Footer from "../components/layout/Footer.jsx";
 
-// Navbar and Footer will be built in Module 3 (Products UI).
-// For now this is a clean shell that renders child routes.
 export default function MainLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Navbar goes here */}
+      <Navbar />
       <main className="flex-1">
         <Outlet />
       </main>
-      {/* Footer goes here */}
+      <Footer />
     </div>
   );
 }

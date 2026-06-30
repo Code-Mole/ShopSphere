@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
+import WishlistButton from "./WishlistButton.jsx";
 
 export default function ProductCard({ product }) {
   const {
+    _id,
     name,
     slug,
     price,
@@ -27,13 +29,16 @@ export default function ProductCard({ product }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
+          {/* Wishlist button — top right corner */}
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <WishlistButton productId={_id} />
+          </div>
           {/* Discount badge */}
           {discountPercent > 0 && (
             <span className="absolute top-2 left-2 badge bg-red-500 text-white">
               -{discountPercent}%
             </span>
           )}
-          {/* Out of stock overlay */}
           {!inStock && (
             <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
               <span className="badge bg-gray-200 text-gray-600 text-sm">
@@ -53,15 +58,13 @@ export default function ProductCard({ product }) {
           <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-2 group-hover:text-primary-600 transition-colors">
             {name}
           </h3>
-
-          {/* Rating */}
           {ratings?.count > 0 && (
             <div className="flex items-center gap-1.5 mb-2">
               <div className="flex">
-                {[1, 2, 3, 4, 5].map((star) => (
+                {[1, 2, 3, 4, 5].map((s) => (
                   <svg
-                    key={star}
-                    className={`w-3.5 h-3.5 ${star <= Math.round(ratings.average) ? "text-amber-400" : "text-gray-200"}`}
+                    key={s}
+                    className={`w-3.5 h-3.5 ${s <= Math.round(ratings.average) ? "text-amber-400" : "text-gray-200"}`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -72,8 +75,6 @@ export default function ProductCard({ product }) {
               <span className="text-xs text-gray-400">({ratings.count})</span>
             </div>
           )}
-
-          {/* Price */}
           <div className="flex items-center gap-2">
             <span className="text-base font-bold text-gray-900">
               GH₵{price.toLocaleString()}

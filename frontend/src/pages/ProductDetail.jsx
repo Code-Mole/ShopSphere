@@ -3,7 +3,12 @@ import { useParams, Link } from "react-router-dom";
 import { productService } from "../services/product.service.js";
 import ProductGrid from "../components/product/ProductGrid.jsx";
 import Spinner from "../components/ui/Spinner.jsx";
-
+import { useCart }     from '../contexts/CartContext.jsx';
+import { useWishlist } from '../contexts/WishlistContext.jsx';
+import { useAuth }     from '../contexts/AuthContext.jsx';
+import WishlistButton  from '../components/product/WishlistButton.jsx';
+import ReviewSection   from '../components/product/ReviewSection.jsx';
+import { useNavigate } from 'react-router-dom';
 export default function ProductDetail() {
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
@@ -11,6 +16,25 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [imgIndex, setImgIndex] = useState(0);
   const [qty, setQty] = useState(1);
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+  const [addingToCart, setAddingToCart] = useState(false);
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    setAddingToCart(true);
+    try {
+      await addToCart(product._id, qty);
+      navigate("/cart");
+    } catch (err) {
+      alert(err.response?.data?.message || "Could not add to cart.");
+    } finally {
+      setAddingToCart(false);
+    }
+  };
 
   useEffect(() => {
     const fetch = async () => {
@@ -199,11 +223,10 @@ export default function ProductDetail() {
 
           {/* Quantity + Actions */}
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
-            {/* Quantity selector */}
             <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden w-fit">
               <button
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
-                className="w-10 h-11 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                className="w-10 h-11 flex items-center justify-center text-gray-500 hover:bg-gray-50"
               >
                 −
               </button>
@@ -213,50 +236,43 @@ export default function ProductDetail() {
               <button
                 onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
                 disabled={qty >= product.stock}
-                className="w-10 h-11 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-40"
+                className="w-10 h-11 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-40"
               >
                 +
               </button>
             </div>
 
             <button
-              disabled={!product.inStock}
-              className="btn-primary flex-1 py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() => {
-                /* wired in Module 4 */
-              }}
+              disabled={!product.inStock || addingToCart}
+              onClick={handleAddToCart}
+              className="btn-primary flex-1 py-3 text-base disabled:opacity-50"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              Add to Cart
+              {addingToCart ? (
+                <Spinner size="sm" color="white" />
+              ) : (
+                <>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                  Add to Cart
+                </>
+              )}
             </button>
 
-            <button className="btn-secondary p-3">
-              <svg
-                className="w-5 h-5 text-gray-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </button>
+            <WishlistButton
+              productId={product._id}
+              className="p-3 rounded-lg"
+            />
           </div>
 
           {/* Tags */}
@@ -285,6 +301,7 @@ export default function ProductDetail() {
           <ProductGrid products={related} loading={false} />
         </div>
       )}
+      <ReviewSection productId={product._id} />
     </div>
   );
 }

@@ -1,9 +1,16 @@
+import { Routes, Route } from "react-router-dom";
+import MainLayout from "./layouts/MainLayout.jsx";
+import Home from "./pages/Home.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
-
-function App() {
+// More routes will be added here as each module is built.
+export default function App() {
   return (
-    <div>App</div>
-  )
+    <Routes>
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<Home />} />
+      </Route>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
 }
-
-export default App

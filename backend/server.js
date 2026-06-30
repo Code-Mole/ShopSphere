@@ -9,32 +9,21 @@ import { connectDB } from "./config/db.js";
 import { notFound } from "./middleware/notFound.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import router from "./routes/index.js";
+import webhookRoutes from "./routes/webhook.routes.js"; // NEW
 
-// Load environment variables
 dotenv.config();
-
-// Connect to MongoDB
 connectDB();
 
 const app = express();
 
-// ─── Security Middleware ──────────────────────────────────────────────────────
-
-// Set secure HTTP headers
 app.use(helmet());
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 
-// Enable CORS — only allow our frontend
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-  }),
-);
+// It needs the raw request body to verify Paystack's signature.
+app.use("/api/v1/webhooks", webhookRoutes);
 
-// Sanitize MongoDB query injection (e.g. $where attacks)
 app.use(mongoSanitize());
 
-// Global rate limiter — 100 requests per 15 minutes per IP
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -45,37 +34,21 @@ const limiter = rateLimit({
 });
 app.use("/api", limiter);
 
-// ─── General Middleware ───────────────────────────────────────────────────────
-
-// Parse JSON bodies
 app.use(express.json({ limit: "10mb" }));
-
-// Parse URL-encoded bodies (for form submissions)
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// HTTP request logger (development only)
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// ─── Routes ──────────────────────────────────────────────────────────────────
-
 app.use("/api/v1", router);
 
-// Health check endpoint
 app.get("/", (req, res) => {
   res.json({ success: true, message: "ShopSphere API is running 🚀" });
 });
 
-// ─── Error Handling ───────────────────────────────────────────────────────────
-
-// 404 handler — must come AFTER all routes
 app.use(notFound);
-
-// Global error handler — must be last
 app.use(errorHandler);
-
-// ─── Start Server ─────────────────────────────────────────────────────────────
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

@@ -67,3 +67,44 @@ export const sendWelcomeEmail = async (user) => {
       </div>`,
   });
 };
+
+// Append these two functions to the existing email.service.js file
+
+export const sendOrderConfirmationEmail = async (user, order) => {
+  const itemsHtml = order.items.map(item => `
+    <tr>
+      <td style="padding:8px 0;color:#333;font-size:14px;">${item.name} × ${item.quantity}</td>
+      <td style="padding:8px 0;text-align:right;color:#333;font-size:14px;">GH₵${(item.price * item.quantity).toLocaleString()}</td>
+    </tr>`).join('');
+
+  await sendEmail({
+    to: user.email,
+    subject: `Order Confirmed — ${order.orderNumber}`,
+    html: `
+      <div style="font-family:Inter,sans-serif;max-width:560px;margin:auto;padding:32px;background:#fff;border-radius:16px;border:1px solid #f0f0f0;">
+        <h1 style="font-size:24px;font-weight:700;color:#111;margin:0 0 4px;">Thank you, ${user.name}! 🎉</h1>
+        <p style="color:#666;font-size:14px;margin:0 0 24px;">Order <strong>${order.orderNumber}</strong> has been confirmed.</p>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
+          ${itemsHtml}
+        </table>
+        <div style="border-top:1px solid #eee;padding-top:12px;display:flex;justify-content:space-between;">
+          <strong style="color:#111;">Total</strong>
+          <strong style="color:#111;">GH₵${order.pricing.total.toLocaleString()}</strong>
+        </div>
+        <a href="${process.env.CLIENT_URL}/orders/${order._id}" style="display:inline-block;margin-top:24px;padding:14px 28px;background:#c026d3;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;">Track Your Order</a>
+      </div>`,
+  });
+};
+
+export const sendPaymentConfirmationEmail = async (user, order, payment) => {
+  await sendEmail({
+    to: user.email,
+    subject: `Payment Received — GH₵${payment.amount.toLocaleString()}`,
+    html: `
+      <div style="font-family:Inter,sans-serif;max-width:560px;margin:auto;padding:32px;background:#fff;border-radius:16px;border:1px solid #f0f0f0;">
+        <h1 style="font-size:22px;font-weight:700;color:#111;margin:0 0 8px;">Payment Successful ✅</h1>
+        <p style="color:#666;font-size:14px;">We've received GH₵${payment.amount.toLocaleString()} for order ${order.orderNumber}.</p>
+        <p style="color:#999;font-size:13px;margin-top:16px;">Reference: ${payment.reference}</p>
+      </div>`,
+  });
+};

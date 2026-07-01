@@ -18,6 +18,14 @@ import Checkout from "./pages/Checkout.jsx";
 import OrderConfirmation from "./pages/OrderConfirmation.jsx";
 import Orders from "./pages/Orders.jsx";
 import OrderDetail from "./pages/OrderDetail.jsx";
+// admin
+import AdminLayout from "./layouts/AdminLayout.jsx";
+import AdminDashboard from "./pages/admin/Dashboard.jsx";
+import AdminProducts from "./pages/admin/Products.jsx";
+import AdminCategories from "./pages/admin/Categories.jsx";
+import AdminOrders from "./pages/admin/Orders.jsx";
+import AdminCustomers from "./pages/admin/Customers.jsx";
+import AdminCoupons from "./pages/admin/Coupons.jsx";
 
 export default function App() {
   return (
@@ -77,16 +85,21 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute role="admin">
-                <div className="p-8 text-center text-gray-500">
-                  Admin Dashboard — Module 6
-                </div>
-              </ProtectedRoute>
-            }
-          />
+        </Route>
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="categories" element={<AdminCategories />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="customers" element={<AdminCustomers />} />
+          <Route path="coupons" element={<AdminCoupons />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

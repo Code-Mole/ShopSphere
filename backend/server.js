@@ -1,5 +1,5 @@
 import express from "express";
-import dotenv from "dotenv";
+import "dotenv/config";
 import helmet from "helmet";
 import cors from "cors";
 import morgan from "morgan";
@@ -9,9 +9,9 @@ import { connectDB } from "./config/db.js";
 import { notFound } from "./middleware/notFound.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import router from "./routes/index.js";
-import webhookRoutes from "./routes/webhook.routes.js"; // NEW
+import webhookRoutes from "./routes/webhook.routes.js"; 
 
-dotenv.config();
+
 connectDB();
 
 const app = express();
